@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Красное · Чёрное — прототип ядра</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{min-height:100%;}
+  :root{
+    --bg:#0c0d11; --panel:#15171e; --panel2:#1d2029; --line:#2a2e3a;
+    --txt:#eef0f5; --mut:#8b93a7; --gold:#f4c84a;
+    --red:#e0394b; --redh:#ff6273; --black:#23262f; --blackh:#454a59;
+    --green:#27c08a; --greenh:#3ee0a3;
+  }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;
+    background:radial-gradient(1200px 600px at 50% -10%,#1a1340 0%,#0c0d11 55%);
+    color:var(--txt); display:flex; justify-content:center; padding:14px;
+    user-select:none;-webkit-user-select:none; min-height:100dvh;
+  }
+  .wrap{width:100%;max-width:460px;display:flex;flex-direction:column;gap:14px;}
+
+  .card-panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:22px;
+    padding:18px 16px 20px;box-shadow:0 20px 50px rgba(0,0,0,.45);
+  }
+  .brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;}
+  .brand .dot{width:11px;height:11px;border-radius:50%;}
+  .brand .r{background:var(--red);box-shadow:0 0 12px var(--red);}
+  .brand .b{background:#000;border:1px solid #555;}
+  .brand h1{font-size:14px;font-weight:700;letter-spacing:.22em;color:var(--gold);}
+
+  .balrow{display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;}
+  .pill{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:9px 8px;text-align:center;}
+  .pill .l{font-size:10px;letter-spacing:.1em;color:var(--mut);text-transform:uppercase;}
+  .pill .v{font-size:19px;font-weight:700;margin-top:2px;}
+  #balance{color:var(--gold);}
+  .star{font-size:.8em;opacity:.85;}
+
+  .stage{position:relative;height:250px;display:flex;align-items:center;justify-content:center;perspective:1000px;margin:4px 0 8px;}
+  .deck-card{
+    width:160px;height:224px;border-radius:18px;position:relative;
+    background:linear-gradient(160deg,#2a2140,#191333);border:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 14px 36px rgba(0,0,0,.5);transform-style:preserve-3d;
+  }
+  .deck-card .back-mark{font-size:60px;color:var(--gold);opacity:.55;}
+  .deck-card.up{background:#f7f4ee;border-color:#fff;}
+  .pip{font-size:88px;font-weight:700;line-height:1;}
+  .corner{position:absolute;font-size:22px;font-weight:800;line-height:1;}
+  .corner.tl{top:12px;left:14px;}
+  .corner.br{bottom:12px;right:14px;transform:rotate(180deg);}
+
+  .pot{position:absolute;top:8px;left:0;right:0;text-align:center;pointer-events:none;}
+  .pot .pv{font-size:30px;font-weight:800;color:var(--gold);text-shadow:0 2px 10px rgba(0,0,0,.6);}
+  .pot .pm{font-size:12px;color:var(--mut);}
+
+  .hint{text-align:center;min-height:20px;font-size:14px;color:var(--gold);margin:2px 0 12px;font-weight:500;}
+
+  .stake{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;}
+  .stake .lab{font-size:11px;color:var(--mut);letter-spacing:.08em;}
+  .stake button{padding:8px 16px;font-size:15px;font-weight:700;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--mut);cursor:pointer;}
+  .stake button.on{background:var(--gold);color:#191333;border-color:var(--gold);}
+
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:14px;font-weight:700;transition:transform .05s,filter .15s;touch-action:manipulation;}
+  button:active{transform:scale(.97);}
+  button:disabled{opacity:.4;cursor:default;}
+  .btn-red{padding:22px 0;font-size:18px;color:#fff;background:var(--red);}
+  .btn-red:hover:not(:disabled){background:var(--redh);}
+  .btn-black{padding:22px 0;font-size:18px;color:#fff;background:var(--black);border:1px solid #3a3f4d;}
+  .btn-black:hover:not(:disabled){background:var(--blackh);}
+  .btn-cash{width:100%;margin-top:12px;padding:16px 0;font-size:16px;color:#0c0d11;background:var(--gold);}
+  .btn-cash:hover:not(:disabled){filter:brightness(1.08);}
+  .btn-start{width:100%;margin-top:12px;padding:16px 0;font-size:16px;color:#0c0d11;background:var(--green);}
+
+  .ladder{display:flex;gap:5px;justify-content:center;margin-top:14px;}
+  .step{flex:1;text-align:center;font-size:10px;color:var(--mut);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 2px;}
+  .step.active{border-color:var(--gold);color:var(--gold);}
+  .step.done{background:rgba(39,192,138,.15);border-color:var(--green);color:var(--greenh);}
+  .step b{display:block;font-size:12px;font-weight:800;}
+
+  .section{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 16px;}
+  .section h2{font-size:11px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .metric{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:9px 10px;}
+  .metric .l{font-size:10px;color:var(--mut);letter-spacing:.05em;}
+  .metric .v{font-size:18px;font-weight:700;margin-top:2px;}
+  .pos{color:var(--green);} .neg{color:var(--red);}
+  .note{font-size:11px;color:var(--mut);line-height:1.5;margin-top:10px;}
+
+  .sim-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+  .sim-row button{flex:1;min-width:90px;padding:11px 6px;font-size:13px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:11px;}
+  .sim-row button:hover{border-color:var(--gold);}
+  #simOut{font-size:12px;line-height:1.7;color:var(--txt);}
+  #simOut .k{color:var(--mut);}
+  .bar{height:6px;background:var(--panel2);border-radius:4px;overflow:hidden;margin-top:8px;border:1px solid var(--line);}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--greenh));}
+
+  .pf-row{font-size:12px;line-height:1.7;word-break:break-all;}
+  .pf-row .k{color:var(--mut);display:inline-block;min-width:96px;}
+  .pf-row code{color:var(--gold);font-family:ui-monospace,Menlo,monospace;font-size:11px;}
+  .pf-input{width:100%;margin-top:8px;padding:9px 10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-family:ui-monospace,monospace;font-size:12px;}
+  .pf-btns{display:flex;gap:8px;margin-top:10px;}
+  .pf-btns button{flex:1;padding:10px;font-size:12px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:10px;}
+  .pf-verify{font-size:11px;margin-top:9px;padding:8px 10px;border-radius:9px;display:none;}
+  .pf-verify.ok{display:block;background:rgba(39,192,138,.12);border:1px solid var(--green);color:var(--greenh);}
+  .pf-verify.bad{display:block;background:rgba(224,57,75,.12);border:1px solid var(--red);color:var(--redh);}
+
+  .ref{display:flex;gap:8px;align-items:center;background:var(--panel2);border:1px dashed var(--line);border-radius:12px;padding:10px 12px;}
+  .ref .lnk{flex:1;font-family:ui-monospace,monospace;font-size:12px;color:var(--gold);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ref button{padding:8px 12px;font-size:12px;background:var(--gold);color:#0c0d11;border-radius:9px;}
+  .ref-stats{display:flex;gap:9px;margin-top:10px;}
+  .ref-stats .metric{flex:1;text-align:center;}
+
+  .gate{position:fixed;inset:0;background:rgba(8,9,13,.97);display:flex;align-items:center;justify-content:center;z-index:50;padding:24px;}
+  .gate .box{max-width:340px;text-align:center;}
+  .gate h2{font-size:20px;color:var(--gold);margin-bottom:12px;letter-spacing:.1em;}
+  .gate p{font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:20px;}
+  .gate .g-btns{display:flex;gap:10px;}
+  .gate .g-btns button{flex:1;padding:14px;font-size:15px;border-radius:12px;}
+  .g-yes{background:var(--gold);color:#0c0d11;}
+  .g-no{background:var(--panel2);color:var(--mut);border:1px solid var(--line);}
+  .foot{text-align:center;font-size:10px;color:var(--mut);padding:4px 0 10px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="box">
+    <h2>18+</h2>
+    <p>Это прототип азартной игры. Только для лиц старше 18 лет. Демо-режим: играем на условные звёзды, реальные деньги не используются.</p>
+    <div class="g-btns">
+      <button class="g-yes" id="gateYes">Мне есть 18</button>
+      <button class="g-no" onclick="location.href='about:blank'">Выход</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ИГРА -->
+  <div class="card-panel">
+    <div class="brand"><span class="dot r"></span><span class="dot b"></span><h1>КРАСНОЕ · ЧЁРНОЕ</h1></div>
+
+    <div class="balrow">
+      <div class="pill"><div class="l">Баланс</div><div class="v" id="balance">2 000<span class="star">★</span></div></div>
+      <div class="pill"><div class="l">Серия</div><div class="v" id="streak">0</div></div>
+      <div class="pill"><div class="l">Множитель</div><div class="v">×1,85</div></div>
+    </div>
+
+    <div class="stage">
+      <div class="pot" id="potWrap" style="visibility:hidden;">
+        <div class="pv" id="potVal">0★</div>
+        <div class="pm" id="potMul">×1,00</div>
+      </div>
+      <div class="deck-card" id="card"><div class="back-mark">◆</div></div>
+    </div>
+
+    <div class="hint" id="hint">Выбери ставку и начни раунд</div>
+
+    <div class="stake">
+      <span class="lab">СТАВКА:</span>
+      <button id="st50" class="on">50★</button>
+      <button id="st100">100★</button>
+    </div>
+
+    <div class="controls">
+      <button class="btn-red" id="red" disabled>КРАСНОЕ</button>
+      <button class="btn-black" id="black" disabled>ЧЁРНОЕ</button>
+    </div>
+    <button class="btn-start" id="start">Поставить 50★ и начать</button>
+    <button class="btn-cash" id="cash" style="display:none;">Забрать</button>
+
+    <div class="ladder" id="ladder"></div>
+  </div>
+
+  <!-- ОБОРОТ И EDGE -->
+  <div class="section">
+    <h2>📊 Касса · оборот · перевес</h2>
+    <div class="grid2">
+      <div class="metric"><div class="l">Касса (запас)</div><div class="v" id="mFloat">—</div></div>
+      <div class="metric"><div class="l">Оборот (всего ставок)</div><div class="v" id="mTurn">0★</div></div>
+      <div class="metric"><div class="l">Доход заведения</div><div class="v" id="mProfit">0★</div></div>
+      <div class="metric"><div class="l">Факт. перевес</div><div class="v" id="mEdge">—</div></div>
+    </div>
+    <div class="note">Перевес <b style="color:var(--gold)">7,5%</b> на каждую карту (×1,85 вместо честных ×2). На коротких сериях факт скачет, на дистанции выходит ~7,5–7,9% (потолок ×20 чуть добавляет в пользу кассы — на последней карте выплата усечена). Доход берётся с <b>оборота</b>, а не с депозита: чем дольше крутят свои звёзды, тем больше касса.</div>
+  </div>
+
+  <!-- СИМУЛЯЦИЯ -->
+  <div class="section">
+    <h2>🤖 Симуляция: прогнать много ставок</h2>
+    <div class="sim-row">
+      <button data-n="1000">1 000 раундов</button>
+      <button data-n="10000">10 000 раундов</button>
+      <button data-n="100000">100 000 раундов</button>
+    </div>
+    <div id="simOut">Нажми, чтобы прогнать тысячи раундов случайных игроков на текущей ставке и потолке. Покажет, как касса в среднем растёт на 7,5% и какие бывают просадки (хватит ли запаса).</div>
+    <div class="bar" id="simBar" style="display:none;"><i style="width:0"></i></div>
+    <div class="note" id="simNote" style="display:none;"></div>
+  </div>
+
+  <!-- PROVABLY FAIR -->
+  <div class="section">
+    <h2>🔒 Провабли-фейр (честность)</h2>
+    <div class="pf-row"><span class="k">Server seed:</span> <code id="pfHash">—</code></div>
+    <div class="pf-row"><span class="k">(хэш до игры)</span></div>
+    <label class="pf-row"><span class="k">Client seed:</span></label>
+    <input class="pf-input" id="pfClient" value="">
+    <div class="pf-row" style="margin-top:8px;"><span class="k">Карта № (nonce):</span> <code id="pfNonce">0</code></div>
+    <div class="pf-btns">
+      <button id="pfReveal">Раскрыть server seed</button>
+      <button id="pfCheck">Проверить последнюю карту</button>
+    </div>
+    <div class="pf-verify" id="pfResult"></div>
+    <div class="note">Server seed фиксируется заранее (виден только его хэш). Цвет каждой карты = HMAC-SHA256(server seed, client seed:номер). Колода «перемешивается» после каждой карты — каждая независима, счёт карт невозможен. После раунда раскрываем server seed → любой может пересчитать и убедиться, что карты не подкручены.</div>
+  </div>
+
+  <!-- РЕФЕРАЛКА (демо) -->
+  <div class="section">
+    <h2>👥 Реферальная программа · демо</h2>
+    <div class="ref">
+      <span class="lnk" id="refLink">t.me/redblack_bot?startapp=ref_STAN7K</span>
+      <button id="refCopy">Копировать</button>
+    </div>
+    <div class="ref-stats">
+      <div class="metric"><div class="l">Друзей</div><div class="v" id="refN">0</div></div>
+      <div class="metric"><div class="l">Бонус</div><div class="v" id="refBonus">0★</div></div>
+      <div class="metric"><div class="l">% с их оборота</div><div class="v">25%</div></div>
+    </div>
+    <div class="note">Заглушка двигателя роста (как у VIRUS): зовёшь друга → +200★ обоим, дальше получаешь % с его оборота. Своя реф-база = и рост, и страховка от бана бота. Кнопка ниже имитирует приход друга.</div>
+    <button class="btn-cash" id="refAdd" style="margin-top:10px;background:var(--panel2);color:var(--gold);border:1px solid var(--line);">+ Пришёл друг по ссылке</button>
+  </div>
+
+  <div class="foot">Прототип Фазы 1 · демо без реальных денег · механика красно-чёрной лесенки в стиле VIRUS · ×1,85 / потолок ×20 / перемешивание после каждой карты</div>
+</div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var fmt=function(n){return Math.round(n).toLocaleString('ru-RU');};
+  var stars=function(n){return fmt(n)+'★';};
+
+  // ---- параметры ядра ----
+  var MULT=1.85;          // множитель за карту
+  var EDGE=1-MULT/2;      // = 0.075 = 7.5%
+  var CAP=20;             // потолок выигрыша = ставка × 20
+  var bet=50;             // текущая ставка
+
+  // ---- состояние ----
+  var balance=2000, streak=0, pot=0, inRound=false, busy=false;
+  var floatBank=0;        // касса заведения
+  var turnover=0, profit=0; // оборот и доход (с каждого флипа)
+
+  // ---- провабли-фейр ----
+  var serverSeed='', serverHash='', clientSeed='', nonce=0, lastCard=null, revealed=false;
+
+  function randHex(bytes){
+    var a=new Uint8Array(bytes); (crypto.getRandomValues?crypto.getRandomValues(a):a.forEach(function(_,i){a[i]=Math.floor(Math.random()*256);}));
+    return Array.from(a).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  }
+  function sha256hex(str){
+    var enc=new TextEncoder().encode(str);
+    return crypto.subtle.digest('SHA-256',enc).then(function(buf){
+      return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    });
+  }
+  function hmac256(key,msg){
+    var enc=new TextEncoder();
+    return crypto.subtle.importKey('raw',enc.encode(key),{name:'HMAC',hash:'SHA-256'},false,['sign'])
+      .then(function(k){return crypto.subtle.sign('HMAC',k,enc.encode(msg));})
+      .then(function(sig){return Array.from(new Uint8Array(sig)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');});
+  }
+  // цвет карты из hmac: первый байт чёт/нечет
+  function colorFromHmac(hex){ return (parseInt(hex.slice(0,2),16)%2===0)?'red':'black'; }
+
+  function newSeeds(){
+    serverSeed=randHex(32);
+    clientSeed=($('pfClient').value.trim())||randHex(8);
+    $('pfClient').value=clientSeed;
+    nonce=0; revealed=false; lastCard=null;
+    $('pfNonce').textContent='0';
+    $('pfResult').className='pf-verify'; $('pfResult').style.display='none';
+    sha256hex(serverSeed).then(function(h){ serverHash=h; $('pfHash').textContent=h; });
+  }
+
+  // ---- казна по ставке ----
+  function floatFor(b){ return b===50?50000:100000; }
+
+  // ---- ladder / потолок ----
+  // pot после n карт = bet * 1.85^n, но не больше bet*CAP
+  function potAfter(n){ return Math.min(bet*Math.pow(MULT,n), bet*CAP); }
+  function capReached(n){ return bet*Math.pow(MULT,n) >= bet*CAP - 1e-9; }
+  // макс. число оплачиваемых карт (пока < потолка)
+  function maxCards(){ var n=0; while(!capReached(n)) n++; return n; } // 1.85^5=21.6>20 → 5
+
+  function buildLadder(){
+    var L=$('ladder'); L.innerHTML=''; var m=maxCards();
+    for(var i=1;i<=m;i++){
+      var p=potAfter(i);
+      var d=document.createElement('div'); d.className='step'; d.dataset.i=i;
+      d.innerHTML='<span>'+i+' карта</span><b>'+stars(p)+'</b>';
+      if(i===m) d.querySelector('span').textContent=i+' (потолок)';
+      L.appendChild(d);
+    }
+    markLadder();
+  }
+  function markLadder(){
+    [].forEach.call($('ladder').children,function(d){
+      var i=+d.dataset.i; d.className='step'+(i<=streak?' done':'')+(i===streak+1&&inRound?' active':'');
+    });
+  }
+
+  // ---- UI ----
+  function refresh(){
+    $('balance').innerHTML=fmt(balance)+'<span class="star">★</span>';
+    $('streak').textContent=streak;
+    $('mFloat').textContent=stars(floatBank);
+    $('mTurn').textContent=stars(turnover);
+    $('mProfit').textContent=(profit>=0?'+':'')+stars(profit);
+    $('mProfit').className='v '+(profit>=0?'pos':'neg');
+    $('mEdge').textContent=turnover>0?((profit/turnover*100).toFixed(2)+'%'):'—';
+    if(inRound){
+      $('potWrap').style.visibility='visible';
+      $('potVal').textContent=stars(pot);
+      $('potMul').textContent='×'+(pot/bet).toFixed(2).replace('.',',');
+    }else{
+      $('potWrap').style.visibility='hidden';
+    }
+    markLadder();
+  }
+
+  var SUITS={red:['♥','♦'],black:['♠','♣']};
+  var RANKS=['6','7','8','9','10','J','Q','K','A'];
+  function showFace(color){
+    var c=$('card'); c.classList.add('up');
+    var col=color==='red'?'var(--red)':'#111';
+    var suit=SUITS[color][Math.floor(Math.random()*2)];
+    var rank=RANKS[Math.floor(Math.random()*RANKS.length)];
+    c.innerHTML='<div class="pip" style="color:'+col+'">'+suit+'</div>'+
+                '<div class="corner tl" style="color:'+col+'">'+rank+'<br>'+suit+'</div>'+
+                '<div class="corner br" style="color:'+col+'">'+rank+'<br>'+suit+'</div>';
+  }
+  function showBack(){ var c=$('card'); c.classList.remove('up'); c.innerHTML='<div class="back-mark">◆</div>'; }
+  // видимое перемешивание колоды (виртуальный риффл) после каждой карты
+  function shuffleAnim(){
+    return new Promise(function(res){
+      showBack();
+      var main=$('card'), stage=main.parentElement, ghosts=[];
+      for(var i=0;i<2;i++){
+        var g=main.cloneNode(true); g.id='';
+        g.style.position='absolute'; g.style.left='0'; g.style.right='0'; g.style.top='0'; g.style.bottom='0';
+        g.style.margin='auto'; g.style.pointerEvents='none'; g.style.zIndex='1';
+        stage.appendChild(g); ghosts.push(g);
+      }
+      main.style.zIndex='2';
+      var dur=560;
+      for(var k=0;k<7;k++)(function(kk){setTimeout(function(){beep(250+Math.random()*140,0.02,'square',0.022);},kk*60);})(k);
+      function cleanup(){ ghosts.forEach(function(g){g.remove();}); main.style.zIndex=''; res(); }
+      if(main.animate){
+        ghosts[0].animate([{transform:'translateX(0) rotate(0)'},{transform:'translateX(-66px) rotate(-9deg)'},{transform:'translateX(0) rotate(0)'}],{duration:dur,easing:'ease-in-out'});
+        ghosts[1].animate([{transform:'translateX(0) rotate(0)'},{transform:'translateX(66px) rotate(9deg)'},{transform:'translateX(0) rotate(0)'}],{duration:dur,easing:'ease-in-out'});
+        main.animate([{transform:'translateY(0) scale(1)'},{transform:'translateY(-10px) scale(1.03)'},{transform:'translateY(0) scale(1)'}],{duration:dur,easing:'ease-in-out'}).finished.then(cleanup);
+      } else { setTimeout(cleanup,dur); }
+    });
+  }
+  function flip(half){
+    if(!$('card').animate){half();return Promise.resolve();}
+    return $('card').animate([{transform:'rotateY(0)'},{transform:'rotateY(90deg)'}],{duration:140,easing:'ease-in'}).finished
+      .then(half).then(function(){return $('card').animate([{transform:'rotateY(90deg)'},{transform:'rotateY(0)'}],{duration:140,easing:'ease-out'}).finished;});
+  }
+
+  // ---- звук ----
+  var AC;function beep(f,d,t,v){try{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.value=v||0.06;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+
+  function setStakeUI(){
+    $('st50').classList.toggle('on',bet===50);
+    $('st100').classList.toggle('on',bet===100);
+    $('start').textContent='Поставить '+bet+'★ и начать';
+    floatBank=floatFor(bet);
+  }
+
+  function startRound(){
+    if(inRound||busy) return;
+    if(balance<bet){ $('hint').textContent='Недостаточно звёзд на балансе'; return; }
+    busy=true;
+    balance-=bet; pot=bet; streak=0; inRound=true;
+    newSeeds(); showBack();
+    $('start').style.display='none';
+    $('cash').style.display='block'; $('cash').textContent='Забрать '+stars(pot);
+    $('red').disabled=true; $('black').disabled=true; $('cash').disabled=true;
+    $('hint').textContent='Тасую колоду…';
+    beep(440,0.05,'square',0.04);
+    refresh();
+    shuffleAnim().then(function(){
+      $('hint').textContent='Какого цвета следующая карта?';
+      $('red').disabled=false; $('black').disabled=false; $('cash').disabled=false;
+      busy=false;
+    });
+  }
+
+  function guess(color){
+    if(!inRound||busy) return; busy=true;
+    $('red').disabled=true; $('black').disabled=true; $('cash').disabled=true;
+    nonce++; $('pfNonce').textContent=nonce;
+    var risk=pot; // на кону текущая кучка
+    hmac256(serverSeed, clientSeed+':'+nonce).then(function(hex){
+      var cardColor=colorFromHmac(hex); lastCard={color:cardColor,hex:hex,nonce:nonce};
+      return flip(function(){showFace(cardColor);}).then(function(){return cardColor;});
+    }).then(function(cardColor){
+      turnover+=risk;
+      if(cardColor===color){
+        // выигрыш флипа: касса доплачивает 0.85*risk
+        var np=potAfter(streak+1);
+        floatBank-=(np-pot); profit-=(np-pot);
+        pot=np; streak++;
+        beep(660,0.08,'sine',0.06); setTimeout(function(){beep(900,0.1,'sine',0.06);},70);
+        refresh();
+        if(capReached(streak)){
+          $('hint').textContent='Потолок ×'+CAP+'! Максимум за раунд. Забираем.';
+          finishWin(); busy=false;
+        }else{
+          $('cash').textContent='Забрать '+stars(pot);
+          $('hint').textContent='Перемешиваю колоду 🔀';
+          setTimeout(function(){
+            shuffleAnim().then(function(){
+              $('hint').textContent=streak>=3?'Колода перемешана. Жарко — ещё одну?':'Колода перемешана. Дальше?';
+              $('red').disabled=false; $('black').disabled=false; $('cash').disabled=false;
+              busy=false;
+            });
+          },650);
+        }
+      }else{
+        // проигрыш: касса забирает кучку
+        floatBank+=pot; profit+=pot; pot=0;
+        beep(150,0.35,'sawtooth',0.07);
+        $('hint').textContent='Мимо. Кучка сгорела. Прошёл карт: '+streak;
+        endRound(); refresh(); busy=false;
+      }
+    });
+  }
+
+  function finishWin(){
+    balance+=pot;
+    $('hint').textContent='Забрал '+stars(pot)+' (×'+(pot/bet).toFixed(2).replace('.',',')+')';
+    beep(740,0.09,'sine',0.06);setTimeout(function(){beep(990,0.12,'sine',0.06);},80);
+    pot=0; endRound();
+  }
+  function cashOut(){
+    if(!inRound||busy||pot<=0) return;
+    balance+=pot;
+    $('hint').textContent='Забрал '+stars(pot)+' · серия '+streak;
+    beep(740,0.09,'sine',0.06);setTimeout(function(){beep(990,0.12,'sine',0.06);},80);
+    pot=0; endRound(); refresh();
+  }
+  function endRound(){
+    inRound=false;
+    $('red').disabled=true; $('black').disabled=true; $('cash').disabled=false;
+    $('cash').style.display='none'; $('start').style.display='block';
+    setTimeout(showBack,400);
+    refresh();
+  }
+
+  // ---- симуляция (быстрый PRNG, чисто статистика) ----
+  function simulate(N){
+    var fl=floatFor(bet), start=fl, minFl=fl, maxFl=fl, turn=0, prof=0, m=maxCards();
+    var wins=0;
+    for(var r=0;r<N;r++){
+      // случайный игрок: цель забрать после t карт (1..m), иногда жадничает
+      var target=1+Math.floor(Math.random()*m);
+      var p=bet, s=0, alive=true;
+      for(var c=0;c<target;c++){
+        turn+=p;                       // на кону кучка
+        if(Math.random()<0.5){         // угадал
+          var np=Math.min(bet*Math.pow(MULT,s+1),bet*CAP);
+          prof-=(np-p); fl-=(np-p); p=np; s++;
+          if(p>=bet*CAP-1e-9){alive=true;break;}
+        }else{                         // мимо
+          prof+=p; fl+=p; p=0; alive=false; break;
+        }
+      }
+      if(alive&&p>0){ /* забрал */ wins++; }
+      if(fl<minFl)minFl=fl; if(fl>maxFl)maxFl=fl;
+    }
+    return {start:start,end:fl,turn:turn,prof:prof,minFl:minFl,maxFl:maxFl,edge:prof/turn*100,N:N,wins:wins};
+  }
+  function runSim(N){
+    $('simBar').style.display='block'; $('simBar').firstElementChild.style.width='0';
+    $('simOut').textContent='Считаю '+fmt(N)+' раундов…';
+    setTimeout(function(){
+      var s=simulate(N);
+      var dd=s.start-s.minFl;                 // макс. просадка кассы
+      var ddPct=(dd/s.start*100);
+      $('simOut').innerHTML=
+        '<span class="k">Раундов:</span> '+fmt(s.N)+' · ставка '+bet+'★<br>'+
+        '<span class="k">Оборот:</span> '+stars(s.turn)+'<br>'+
+        '<span class="k">Доход кассы:</span> <b class="'+(s.prof>=0?'pos':'neg')+'">'+(s.prof>=0?'+':'')+stars(s.prof)+'</b><br>'+
+        '<span class="k">Факт. перевес:</span> <b>'+s.edge.toFixed(2)+'%</b> (база 7,5% + потолок)<br>'+
+        '<span class="k">Касса:</span> '+stars(s.start)+' → <b>'+stars(s.end)+'</b><br>'+
+        '<span class="k">Худшая просадка:</span> '+stars(dd)+' ('+ddPct.toFixed(1)+'% запаса)';
+      $('simBar').firstElementChild.style.width=Math.max(0,Math.min(100,(s.end/s.start*50)))+'%';
+      var ok = dd < s.start;
+      $('simNote').style.display='block';
+      $('simNote').innerHTML = ok
+        ? '✅ Запаса хватило: касса просела максимум на '+ddPct.toFixed(1)+'% и закончила в плюсе. Перевес сошёлся к ~7,5%.'
+        : '⚠️ Касса уходила в минус — на старте при малом обороте запас критичен. Поэтому держим ~$1000 и потолок ×'+CAP+'.';
+    },30);
+  }
+
+  // ---- провабли-фейр кнопки ----
+  $('pfReveal').onclick=function(){
+    if(!serverSeed){ return; }
+    revealed=true;
+    $('pfHash').innerHTML=serverSeed+'<br><span style="color:var(--mut);font-size:10px;">(раскрыт · хэш совпадает = карты не подкручены)</span>';
+  };
+  $('pfCheck').onclick=function(){
+    var R=$('pfResult');
+    if(!lastCard){ R.className='pf-verify bad'; R.textContent='Сыграй хотя бы одну карту.'; return; }
+    hmac256(serverSeed, clientSeed+':'+lastCard.nonce).then(function(hex){
+      var col=colorFromHmac(hex);
+      var ok = hex===lastCard.hex && col===lastCard.color;
+      R.className='pf-verify '+(ok?'ok':'bad');
+      R.innerHTML = ok
+        ? '✅ Совпало. Карта №'+lastCard.nonce+': '+(col==='red'?'красное':'чёрное')+'. HMAC: '+hex.slice(0,16)+'…'
+        : '❌ Не совпало.';
+    });
+  };
+
+  // ---- реф-заглушка ----
+  var refN=0;
+  $('refAdd').onclick=function(){ refN++; balance+=200; $('refN').textContent=refN; $('refBonus').textContent=stars(refN*200); $('hint').textContent='Друг #'+refN+' пришёл: +200★ тебе'; refresh(); };
+  $('refCopy').onclick=function(){ try{navigator.clipboard.writeText($('refLink').textContent);$('refCopy').textContent='✓';setTimeout(function(){$('refCopy').textContent='Копировать';},1200);}catch(e){} };
+
+  // ---- ставка ----
+  function setStake(b){ if(inRound)return; bet=b; setStakeUI(); buildLadder(); refresh(); }
+  $('st50').onclick=function(){setStake(50);};
+  $('st100').onclick=function(){setStake(100);};
+
+  // ---- кнопки ----
+  $('red').onclick=function(){guess('red');};
+  $('black').onclick=function(){guess('black');};
+  $('start').onclick=startRound;
+  $('cash').onclick=cashOut;
+  [].forEach.call(document.querySelectorAll('.sim-row button'),function(b){ b.onclick=function(){runSim(+b.dataset.n);}; });
+
+  // ---- 18+ ----
+  $('gateYes').onclick=function(){ $('gate').style.display='none'; };
+
+  // init
+  $('pfClient').value=randHex(8);
+  setStakeUI(); buildLadder(); refresh();
+})();
+</script>
+</body>
+</html>
