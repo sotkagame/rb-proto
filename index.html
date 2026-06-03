@@ -529,7 +529,7 @@
     pot=0; endRound(); busy=false;
   }
   function endRound(){
-    inRound=false;
+    inRound=false; busy=false;
     enableGuess(false); $('cash').disabled=false;
     $('cash').style.display='none'; $('start').style.display='block';
     setSides();
