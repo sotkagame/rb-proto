@@ -55,7 +55,19 @@
     box-shadow:0 14px 36px rgba(0,0,0,.5);transform-style:preserve-3d;
     transition:border-color .25s, box-shadow .25s;
   }
-  .deck-card .back-mark{font-size:58px;color:var(--gold);opacity:.55;}
+  .deck-card.back{
+    background:
+      repeating-linear-gradient(45deg, rgba(124,92,255,.16) 0 7px, transparent 7px 15px),
+      repeating-linear-gradient(-45deg, rgba(176,107,255,.13) 0 7px, transparent 7px 15px),
+      linear-gradient(160deg,#2a2140,#191333);
+    border-color:var(--gold);
+  }
+  .back-emblem{
+    width:84px;height:84px;border-radius:50%;border:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--gold);font-weight:800;font-size:21px;letter-spacing:.02em;
+    background:rgba(25,19,51,.72);box-shadow:inset 0 0 18px rgba(244,200,74,.28);
+  }
   .deck-card.up{background:#f7f4ee;border-color:#fff;}
   .deck-card.win{border-color:var(--green);box-shadow:0 0 0 3px rgba(39,192,138,.5),0 14px 36px rgba(0,0,0,.5);}
   .deck-card.lose{border-color:var(--red);box-shadow:0 0 0 3px rgba(224,57,75,.55),0 14px 36px rgba(0,0,0,.5);}
@@ -174,7 +186,7 @@
         <div class="lbl">Ставка</div>
         <div class="num" id="stakeNum">—</div>
       </div>
-      <div class="deck-card" id="card"><div class="back-mark">◆</div></div>
+      <div class="deck-card back" id="card"><div class="back-emblem">Р·Ч</div></div>
       <div class="side right idle" id="sideWin">
         <div class="lbl">Выигрыш</div>
         <div class="num" id="winNum">—</div>
@@ -379,13 +391,13 @@
   function bump(el){ el.classList.add('bump'); setTimeout(function(){el.classList.remove('bump');},220); }
 
   function showFace(card){
-    var c=$('card'); c.classList.add('up');
+    var c=$('card'); c.className='deck-card up';
     var col=card.c==='red'?'var(--red)':'#111';
     c.innerHTML='<div class="pip" style="color:'+col+'">'+card.s+'</div>'+
                 '<div class="corner tl" style="color:'+col+'">'+card.r+'<br>'+card.s+'</div>'+
                 '<div class="corner br" style="color:'+col+'">'+card.r+'<br>'+card.s+'</div>';
   }
-  function showBack(){ var c=$('card'); c.className='deck-card'; c.innerHTML='<div class="back-mark">◆</div>'; }
+  function showBack(){ var c=$('card'); c.className='deck-card back'; c.innerHTML='<div class="back-emblem">Р·Ч</div>'; }
 
   // огонь при сгорании
   function burn(){
