@@ -9,7 +9,7 @@
   html,body{min-height:100%;}
   :root{
     --bg:#0c0d11; --panel:#15171e; --panel2:#1d2029; --line:#2a2e3a;
-    --txt:#eef0f5; --mut:#8b93a7; --gold:#f4c84a;
+    --txt:#eef0f5; --mut:#8b93a7; --gold:#f4c84a; --fire:#ff8a3c;
     --red:#e0394b; --redh:#ff6273; --black:#23262f; --blackh:#454a59;
     --green:#27c08a; --greenh:#3ee0a3;
   }
@@ -38,30 +38,49 @@
   #balance{color:var(--gold);}
   .star{font-size:.8em;opacity:.85;}
 
-  .stage{position:relative;height:250px;display:flex;align-items:center;justify-content:center;perspective:1000px;margin:4px 0 8px;}
+  /* СЦЕНА: слева ставка · карта · справа выигрыш */
+  .stage{display:flex;align-items:center;justify-content:center;gap:8px;height:262px;perspective:1000px;margin:4px 0 6px;}
+  .side{width:104px;text-align:center;flex:0 0 auto;}
+  .side .lbl{font-size:10px;letter-spacing:.08em;color:var(--mut);text-transform:uppercase;margin-bottom:6px;}
+  .side .num{font-size:32px;font-weight:800;line-height:1;transition:transform .2s;}
+  .side.left .num{color:var(--fire);text-shadow:0 0 14px rgba(255,138,60,.5);}
+  .side.right .num{color:var(--gold);text-shadow:0 0 14px rgba(244,200,74,.45);}
+  .side .num.bump{transform:scale(1.28);}
+  .side.idle{opacity:.28;}
+
   .deck-card{
-    width:160px;height:224px;border-radius:18px;position:relative;
+    width:150px;height:212px;border-radius:18px;position:relative;flex:0 0 auto;
     background:linear-gradient(160deg,#2a2140,#191333);border:2px solid var(--gold);
     display:flex;align-items:center;justify-content:center;
     box-shadow:0 14px 36px rgba(0,0,0,.5);transform-style:preserve-3d;
+    transition:border-color .25s, box-shadow .25s;
   }
-  .deck-card .back-mark{font-size:60px;color:var(--gold);opacity:.55;}
+  .deck-card .back-mark{font-size:58px;color:var(--gold);opacity:.55;}
   .deck-card.up{background:#f7f4ee;border-color:#fff;}
-  .pip{font-size:88px;font-weight:700;line-height:1;}
-  .corner{position:absolute;font-size:22px;font-weight:800;line-height:1;}
-  .corner.tl{top:12px;left:14px;}
-  .corner.br{bottom:12px;right:14px;transform:rotate(180deg);}
+  .deck-card.win{border-color:var(--green);box-shadow:0 0 0 3px rgba(39,192,138,.5),0 14px 36px rgba(0,0,0,.5);}
+  .deck-card.lose{border-color:var(--red);box-shadow:0 0 0 3px rgba(224,57,75,.55),0 14px 36px rgba(0,0,0,.5);}
+  .pip{font-size:84px;font-weight:700;line-height:1;}
+  .corner{position:absolute;font-size:21px;font-weight:800;line-height:1;}
+  .corner.tl{top:12px;left:13px;}
+  .corner.br{bottom:12px;right:13px;transform:rotate(180deg);}
 
-  .pot{position:absolute;top:8px;left:0;right:0;text-align:center;pointer-events:none;}
-  .pot .pv{font-size:30px;font-weight:800;color:var(--gold);text-shadow:0 2px 10px rgba(0,0,0,.6);}
-  .pot .pm{font-size:12px;color:var(--mut);}
+  .flame{position:absolute;font-size:30px;pointer-events:none;}
 
-  .hint{text-align:center;min-height:20px;font-size:14px;color:var(--gold);margin:2px 0 12px;font-weight:500;}
+  .deckbar-wrap{margin:2px 0 10px;}
+  .deckbar{height:6px;background:var(--panel2);border:1px solid var(--line);border-radius:4px;overflow:hidden;}
+  .deckbar i{display:block;height:100%;background:linear-gradient(90deg,#7c5cff,#b06bff);transition:width .3s;}
+  .deckbar-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--mut);margin-top:4px;letter-spacing:.04em;}
 
-  .stake{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;}
+  .hint{text-align:center;min-height:22px;font-size:14px;color:var(--gold);margin:2px 0 12px;font-weight:600;}
+
+  .stake{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;}
   .stake .lab{font-size:11px;color:var(--mut);letter-spacing:.08em;}
-  .stake button{padding:8px 16px;font-size:15px;font-weight:700;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--mut);cursor:pointer;}
-  .stake button.on{background:var(--gold);color:#191333;border-color:var(--gold);}
+  .stake button{padding:10px 18px;font-size:15px;font-weight:800;border-radius:12px;cursor:pointer;transition:transform .08s,box-shadow .2s;}
+  /* 50 — серебристо-синяя, 100 — золотая; выбранная в рамке с свечением */
+  #st50{background:#222633;color:#9fb4d8;border:2px solid #39435c;}
+  #st50.on{background:linear-gradient(160deg,#aebfe0,#7d93c6);color:#10131c;border-color:#dfe8ff;box-shadow:0 0 0 3px rgba(160,180,230,.4);transform:scale(1.05);}
+  #st100{background:#2a2616;color:#d9c277;border:2px solid #5a4d22;}
+  #st100.on{background:linear-gradient(160deg,#ffdd7a,#e7b53c);color:#191333;border-color:#fff0bf;box-shadow:0 0 0 3px rgba(244,200,74,.45);transform:scale(1.05);}
 
   .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   button{font-family:inherit;cursor:pointer;border:none;border-radius:14px;font-weight:700;transition:transform .05s,filter .15s;touch-action:manipulation;}
@@ -151,11 +170,20 @@
     </div>
 
     <div class="stage">
-      <div class="pot" id="potWrap" style="visibility:hidden;">
-        <div class="pv" id="potVal">0★</div>
-        <div class="pm" id="potMul">×1,00</div>
+      <div class="side left idle" id="sideStake">
+        <div class="lbl">Ставка</div>
+        <div class="num" id="stakeNum">—</div>
       </div>
       <div class="deck-card" id="card"><div class="back-mark">◆</div></div>
+      <div class="side right idle" id="sideWin">
+        <div class="lbl">Выигрыш</div>
+        <div class="num" id="winNum">—</div>
+      </div>
+    </div>
+
+    <div class="deckbar-wrap">
+      <div class="deckbar"><i id="deckFill" style="width:100%"></i></div>
+      <div class="deckbar-lbl"><span>Колода</span><span id="deckLeft">36 / 36 карт</span></div>
     </div>
 
     <div class="hint" id="hint">Выбери ставку и начни раунд</div>
@@ -185,7 +213,7 @@
       <div class="metric"><div class="l">Доход заведения</div><div class="v" id="mProfit">0★</div></div>
       <div class="metric"><div class="l">Факт. перевес</div><div class="v" id="mEdge">—</div></div>
     </div>
-    <div class="note">Перевес <b style="color:var(--gold)">7,5%</b> на каждую карту (×1,85 вместо честных ×2). На коротких сериях факт скачет, на дистанции выходит ~7,5–7,9% (потолок ×20 чуть добавляет в пользу кассы — на последней карте выплата усечена). Доход берётся с <b>оборота</b>, а не с депозита: чем дольше крутят свои звёзды, тем больше касса.</div>
+    <div class="note">Перевес <b style="color:var(--gold)">7,5%</b> на каждую карту (×1,85 вместо честных ×2). На коротких сериях факт скачет, на дистанции выходит ~7,5–7,9% (потолок ×20 чуть добавляет в пользу кассы). Доход берётся с <b>оборота</b>, а не с депозита: чем дольше крутят свои звёзды, тем больше касса.</div>
   </div>
 
   <!-- СИМУЛЯЦИЯ -->
@@ -214,7 +242,7 @@
       <button id="pfCheck">Проверить последнюю карту</button>
     </div>
     <div class="pf-verify" id="pfResult"></div>
-    <div class="note">Server seed фиксируется заранее (виден только его хэш). Цвет каждой карты = HMAC-SHA256(server seed, client seed:номер). Колода «перемешивается» после каждой карты — каждая независима, счёт карт невозможен. После раунда раскрываем server seed → любой может пересчитать и убедиться, что карты не подкручены.</div>
+    <div class="note">Цвет каждой карты независимо задаётся хэшем HMAC-SHA256(server seed, client seed:номер) — это честные 50/50. Колода из 36 карт убывает (виден прогресс), но цвет не зависит от остатка колоды, поэтому счёт карт не даёт перевеса. После раунда раскрываем server seed → любой может пересчитать и убедиться, что карты не подкручены.</div>
   </div>
 
   <!-- РЕФЕРАЛКА (демо) -->
@@ -233,7 +261,7 @@
     <button class="btn-cash" id="refAdd" style="margin-top:10px;background:var(--panel2);color:var(--gold);border:1px solid var(--line);">+ Пришёл друг по ссылке</button>
   </div>
 
-  <div class="foot">Прототип Фазы 1 · демо без реальных денег · механика красно-чёрной лесенки в стиле VIRUS · ×1,85 / потолок ×20 / перемешивание после каждой карты</div>
+  <div class="foot">Прототип Фазы 1 · демо без реальных денег · ×1,85 / потолок ×20 · колода 36, цвет независим (провабли-фейр)</div>
 </div>
 
 <script>
@@ -243,26 +271,22 @@
   var stars=function(n){return fmt(n)+'★';};
 
   // ---- параметры ядра ----
-  var MULT=1.85;          // множитель за карту
-  var EDGE=1-MULT/2;      // = 0.075 = 7.5%
-  var CAP=20;             // потолок выигрыша = ставка × 20
-  var bet=50;             // текущая ставка
+  var MULT=1.85, EDGE=1-MULT/2, CAP=20, DECK_BONUS=50;
+  var bet=50;
 
   // ---- состояние ----
   var balance=2000, streak=0, pot=0, inRound=false, busy=false;
-  var floatBank=0;        // касса заведения
-  var turnover=0, profit=0; // оборот и доход (с каждого флипа)
+  var floatBank=0, turnover=0, profit=0;
 
   // ---- провабли-фейр ----
-  var serverSeed='', serverHash='', clientSeed='', nonce=0, lastCard=null, revealed=false;
+  var serverSeed='', serverHash='', clientSeed='', nonce=0, lastCard=null;
 
   function randHex(bytes){
     var a=new Uint8Array(bytes); (crypto.getRandomValues?crypto.getRandomValues(a):a.forEach(function(_,i){a[i]=Math.floor(Math.random()*256);}));
     return Array.from(a).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
   }
   function sha256hex(str){
-    var enc=new TextEncoder().encode(str);
-    return crypto.subtle.digest('SHA-256',enc).then(function(buf){
+    return crypto.subtle.digest('SHA-256',new TextEncoder().encode(str)).then(function(buf){
       return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
     });
   }
@@ -272,28 +296,47 @@
       .then(function(k){return crypto.subtle.sign('HMAC',k,enc.encode(msg));})
       .then(function(sig){return Array.from(new Uint8Array(sig)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');});
   }
-  // цвет карты из hmac: первый байт чёт/нечет
   function colorFromHmac(hex){ return (parseInt(hex.slice(0,2),16)%2===0)?'red':'black'; }
 
   function newSeeds(){
     serverSeed=randHex(32);
     clientSeed=($('pfClient').value.trim())||randHex(8);
     $('pfClient').value=clientSeed;
-    nonce=0; revealed=false; lastCard=null;
+    nonce=0; lastCard=null;
     $('pfNonce').textContent='0';
     $('pfResult').className='pf-verify'; $('pfResult').style.display='none';
     sha256hex(serverSeed).then(function(h){ serverHash=h; $('pfHash').textContent=h; });
   }
 
-  // ---- казна по ставке ----
-  function floatFor(b){ return b===50?50000:100000; }
+  // ---- колода 36 (для ранга/масти, цвет берётся из хэша) ----
+  var RANKS=['6','7','8','9','10','J','Q','K','A'];
+  var SUITS_ALL=[{s:'♥',c:'red'},{s:'♦',c:'red'},{s:'♠',c:'black'},{s:'♣',c:'black'}];
+  var deck=[], deckCompleted=false;
+  function buildDeck(){
+    var d=[];
+    for(var i=0;i<RANKS.length;i++)for(var j=0;j<SUITS_ALL.length;j++)d.push({r:RANKS[i],s:SUITS_ALL[j].s,c:SUITS_ALL[j].c});
+    for(var k=d.length-1;k>0;k--){var m=Math.floor(Math.random()*(k+1));var t=d[k];d[k]=d[m];d[m]=t;}
+    return d;
+  }
+  // достаём карту нужного цвета (цвет уже решён хэшем); колода убывает
+  function drawCardOfColor(color){
+    var idx=-1,i;
+    for(i=0;i<deck.length;i++){ if(deck[i].c===color){ idx=i; break; } }
+    if(idx<0){ deck=buildDeck(); for(i=0;i<deck.length;i++){ if(deck[i].c===color){ idx=i; break; } } }
+    var card=deck.splice(idx,1)[0];
+    if(deck.length===0){ deck=buildDeck(); deckCompleted=true; }
+    return card;
+  }
+  function updateDeckBar(){
+    var left=deck.length;
+    $('deckFill').style.width=(left/36*100)+'%';
+    $('deckLeft').textContent=left+' / 36 карт';
+  }
 
   // ---- ladder / потолок ----
-  // pot после n карт = bet * 1.85^n, но не больше bet*CAP
   function potAfter(n){ return Math.min(bet*Math.pow(MULT,n), bet*CAP); }
   function capReached(n){ return bet*Math.pow(MULT,n) >= bet*CAP - 1e-9; }
-  // макс. число оплачиваемых карт (пока < потолка)
-  function maxCards(){ var n=0; while(!capReached(n)) n++; return n; } // 1.85^5=21.6>20 → 5
+  function maxCards(){ var n=0; while(!capReached(n)) n++; return n; }
 
   function buildLadder(){
     var L=$('ladder'); L.innerHTML=''; var m=maxCards();
@@ -321,29 +364,44 @@
     $('mProfit').textContent=(profit>=0?'+':'')+stars(profit);
     $('mProfit').className='v '+(profit>=0?'pos':'neg');
     $('mEdge').textContent=turnover>0?((profit/turnover*100).toFixed(2)+'%'):'—';
-    if(inRound){
-      $('potWrap').style.visibility='visible';
-      $('potVal').textContent=stars(pot);
-      $('potMul').textContent='×'+(pot/bet).toFixed(2).replace('.',',');
-    }else{
-      $('potWrap').style.visibility='hidden';
-    }
+    updateDeckBar();
     markLadder();
   }
-
-  var SUITS={red:['♥','♦'],black:['♠','♣']};
-  var RANKS=['6','7','8','9','10','J','Q','K','A'];
-  function showFace(color){
-    var c=$('card'); c.classList.add('up');
-    var col=color==='red'?'var(--red)':'#111';
-    var suit=SUITS[color][Math.floor(Math.random()*2)];
-    var rank=RANKS[Math.floor(Math.random()*RANKS.length)];
-    c.innerHTML='<div class="pip" style="color:'+col+'">'+suit+'</div>'+
-                '<div class="corner tl" style="color:'+col+'">'+rank+'<br>'+suit+'</div>'+
-                '<div class="corner br" style="color:'+col+'">'+rank+'<br>'+suit+'</div>';
+  function setSides(){
+    if(inRound){
+      $('sideStake').classList.remove('idle'); $('sideWin').classList.remove('idle');
+      $('stakeNum').textContent=stars(bet);
+      $('winNum').textContent=stars(pot);
+    }else{
+      $('sideStake').classList.add('idle'); $('sideWin').classList.add('idle');
+    }
   }
-  function showBack(){ var c=$('card'); c.classList.remove('up'); c.innerHTML='<div class="back-mark">◆</div>'; }
-  // видимое перемешивание колоды (виртуальный риффл) после каждой карты
+  function bump(el){ el.classList.add('bump'); setTimeout(function(){el.classList.remove('bump');},220); }
+
+  function showFace(card){
+    var c=$('card'); c.classList.add('up');
+    var col=card.c==='red'?'var(--red)':'#111';
+    c.innerHTML='<div class="pip" style="color:'+col+'">'+card.s+'</div>'+
+                '<div class="corner tl" style="color:'+col+'">'+card.r+'<br>'+card.s+'</div>'+
+                '<div class="corner br" style="color:'+col+'">'+card.r+'<br>'+card.s+'</div>';
+  }
+  function showBack(){ var c=$('card'); c.className='deck-card'; c.innerHTML='<div class="back-mark">◆</div>'; }
+
+  // огонь при сгорании
+  function burn(){
+    var stage=$('card').parentElement;
+    for(var i=0;i<7;i++){(function(k){
+      setTimeout(function(){
+        var f=document.createElement('div'); f.className='flame'; f.textContent='🔥';
+        f.style.left=(46+Math.random()*60)+'%'; f.style.top='52%';
+        stage.appendChild(f);
+        if(f.animate){
+          f.animate([{transform:'translateY(0) scale(.8)',opacity:1},{transform:'translateY(-90px) scale(1.5)',opacity:0}],{duration:900,easing:'ease-out'}).finished.then(function(){f.remove();});
+        } else { setTimeout(function(){f.remove();},900); }
+      },k*70);
+    })(i);}
+  }
+
   function shuffleAnim(){
     return new Promise(function(res){
       showBack();
@@ -355,8 +413,8 @@
         stage.appendChild(g); ghosts.push(g);
       }
       main.style.zIndex='2';
-      var dur=560;
-      for(var k=0;k<7;k++)(function(kk){setTimeout(function(){beep(250+Math.random()*140,0.02,'square',0.022);},kk*60);})(k);
+      var dur=820;
+      for(var k=0;k<9;k++)(function(kk){setTimeout(function(){beep(250+Math.random()*140,0.02,'square',0.022);},kk*78);})(k);
       function cleanup(){ ghosts.forEach(function(g){g.remove();}); main.style.zIndex=''; res(); }
       if(main.animate){
         ghosts[0].animate([{transform:'translateX(0) rotate(0)'},{transform:'translateX(-66px) rotate(-9deg)'},{transform:'translateX(0) rotate(0)'}],{duration:dur,easing:'ease-in-out'});
@@ -367,11 +425,11 @@
   }
   function flip(half){
     if(!$('card').animate){half();return Promise.resolve();}
-    return $('card').animate([{transform:'rotateY(0)'},{transform:'rotateY(90deg)'}],{duration:140,easing:'ease-in'}).finished
-      .then(half).then(function(){return $('card').animate([{transform:'rotateY(90deg)'},{transform:'rotateY(0)'}],{duration:140,easing:'ease-out'}).finished;});
+    return $('card').animate([{transform:'rotateY(0)'},{transform:'rotateY(90deg)'}],{duration:230,easing:'ease-in'}).finished
+      .then(half).then(function(){return $('card').animate([{transform:'rotateY(90deg)'},{transform:'rotateY(0)'}],{duration:230,easing:'ease-out'}).finished;});
   }
+  function pause(ms){ return new Promise(function(r){setTimeout(r,ms);}); }
 
-  // ---- звук ----
   var AC;function beep(f,d,t,v){try{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.value=v||0.06;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
 
   function setStakeUI(){
@@ -380,6 +438,9 @@
     $('start').textContent='Поставить '+bet+'★ и начать';
     floatBank=floatFor(bet);
   }
+  function floatFor(b){ return b===50?50000:100000; }
+
+  function enableGuess(on){ $('red').disabled=!on; $('black').disabled=!on; $('cash').disabled=!on; }
 
   function startRound(){
     if(inRound||busy) return;
@@ -389,109 +450,112 @@
     newSeeds(); showBack();
     $('start').style.display='none';
     $('cash').style.display='block'; $('cash').textContent='Забрать '+stars(pot);
-    $('red').disabled=true; $('black').disabled=true; $('cash').disabled=true;
-    $('hint').textContent='Тасую колоду…';
+    enableGuess(false);
+    setSides(); bump($('stakeNum'));
     beep(440,0.05,'square',0.04);
     refresh();
-    shuffleAnim().then(function(){
+    var fresh = deck.length>=36;
+    if(fresh){
+      $('hint').textContent='Тасую свежую колоду…';
+      shuffleAnim().then(function(){ readyToGuess(); });
+    }else{
       $('hint').textContent='Какого цвета следующая карта?';
-      $('red').disabled=false; $('black').disabled=false; $('cash').disabled=false;
-      busy=false;
-    });
+      enableGuess(true); busy=false;
+    }
+  }
+  function readyToGuess(){
+    $('hint').textContent='Какого цвета следующая карта?';
+    enableGuess(true); busy=false;
   }
 
   function guess(color){
     if(!inRound||busy) return; busy=true;
-    $('red').disabled=true; $('black').disabled=true; $('cash').disabled=true;
+    enableGuess(false);
     nonce++; $('pfNonce').textContent=nonce;
-    var risk=pot; // на кону текущая кучка
+    var risk=pot;
+    $('hint').textContent='Открываю карту…';
     hmac256(serverSeed, clientSeed+':'+nonce).then(function(hex){
-      var cardColor=colorFromHmac(hex); lastCard={color:cardColor,hex:hex,nonce:nonce};
-      return flip(function(){showFace(cardColor);}).then(function(){return cardColor;});
+      var cardColor=colorFromHmac(hex);
+      var drawn=drawCardOfColor(cardColor);
+      lastCard={color:cardColor,hex:hex,nonce:nonce,card:drawn};
+      return flip(function(){showFace(drawn);}).then(function(){ updateDeckBar(); return cardColor; });
     }).then(function(cardColor){
       turnover+=risk;
+      return pause(450).then(function(){ return cardColor; });   // дать рассмотреть карту
+    }).then(function(cardColor){
       if(cardColor===color){
-        // выигрыш флипа: касса доплачивает 0.85*risk
         var np=potAfter(streak+1);
         floatBank-=(np-pot); profit-=(np-pot);
         pot=np; streak++;
-        beep(660,0.08,'sine',0.06); setTimeout(function(){beep(900,0.1,'sine',0.06);},70);
-        refresh();
+        $('card').classList.remove('lose'); $('card').classList.add('win');
+        beep(660,0.08,'sine',0.06); setTimeout(function(){beep(900,0.1,'sine',0.06);},80);
+        var bonusMsg='';
+        if(deckCompleted){ balance+=DECK_BONUS; deckCompleted=false; bonusMsg='Колода пройдена! +'+DECK_BONUS+'★. '; beep(1200,0.12,'sine',0.05); }
+        setSides(); bump($('winNum')); refresh();
         if(capReached(streak)){
-          $('hint').textContent='Потолок ×'+CAP+'! Максимум за раунд. Забираем.';
-          finishWin(); busy=false;
+          $('hint').textContent='Потолок ×'+CAP+'! Максимум за раунд — забираем.';
+          pause(700).then(function(){ finishWin(); busy=false; });
         }else{
           $('cash').textContent='Забрать '+stars(pot);
-          $('hint').textContent='Перемешиваю колоду 🔀';
-          setTimeout(function(){
-            shuffleAnim().then(function(){
-              $('hint').textContent=streak>=3?'Колода перемешана. Жарко — ещё одну?':'Колода перемешана. Дальше?';
-              $('red').disabled=false; $('black').disabled=false; $('cash').disabled=false;
-              busy=false;
-            });
-          },650);
+          $('hint').textContent=bonusMsg+(streak>=3?'Жарко! Серия '+streak+'. Ещё карту или забрать?':'Угадал! Серия '+streak+'. Дальше или забрать?');
+          enableGuess(true); busy=false;
         }
       }else{
-        // проигрыш: касса забирает кучку
-        floatBank+=pot; profit+=pot; pot=0;
-        beep(150,0.35,'sawtooth',0.07);
-        $('hint').textContent='Мимо. Кучка сгорела. Прошёл карт: '+streak;
-        endRound(); refresh(); busy=false;
+        floatBank+=pot; profit+=pot;
+        $('card').classList.remove('win'); $('card').classList.add('lose');
+        beep(150,0.4,'sawtooth',0.07); burn();
+        $('winNum').textContent='🔥'; $('sideWin').style.opacity='1';
+        $('hint').textContent = streak===0
+          ? 'Мимо на первой карте — ставка '+stars(bet)+' сгорела.'
+          : 'Мимо! Сгорело на '+(streak+1)+'-й карте. Серия оборвалась на '+streak+'.';
+        pot=0; refresh();
+        pause(1100).then(function(){ endRound(); });
       }
     });
   }
 
   function finishWin(){
     balance+=pot;
-    $('hint').textContent='Забрал '+stars(pot)+' (×'+(pot/bet).toFixed(2).replace('.',',')+')';
-    beep(740,0.09,'sine',0.06);setTimeout(function(){beep(990,0.12,'sine',0.06);},80);
+    $('hint').textContent='Забрал '+stars(pot)+' (×'+(pot/bet).toFixed(2).replace('.',',')+'). Серия '+streak+'.';
+    beep(740,0.09,'sine',0.06);setTimeout(function(){beep(990,0.12,'sine',0.06);},80);setTimeout(function(){beep(1240,0.14,'sine',0.05);},180);
     pot=0; endRound();
   }
   function cashOut(){
-    if(!inRound||busy||pot<=0) return;
+    if(!inRound||busy||pot<=0) return; busy=true;
     balance+=pot;
-    $('hint').textContent='Забрал '+stars(pot)+' · серия '+streak;
+    $('hint').textContent='Забрал '+stars(pot)+' · серия '+streak+'. Касса довольна 😉';
     beep(740,0.09,'sine',0.06);setTimeout(function(){beep(990,0.12,'sine',0.06);},80);
-    pot=0; endRound(); refresh();
+    bump($('winNum'));
+    pot=0; endRound(); busy=false;
   }
   function endRound(){
     inRound=false;
-    $('red').disabled=true; $('black').disabled=true; $('cash').disabled=false;
+    enableGuess(false); $('cash').disabled=false;
     $('cash').style.display='none'; $('start').style.display='block';
-    setTimeout(showBack,400);
+    setSides();
+    setTimeout(function(){ $('card').className='deck-card'; showBack(); },500);
     refresh();
   }
 
-  // ---- симуляция (быстрый PRNG, чисто статистика) ----
+  // ---- симуляция (быстрый PRNG, цвет независим — колода на edge не влияет) ----
   function simulate(N){
     var fl=floatFor(bet), start=fl, minFl=fl, maxFl=fl, turn=0, prof=0, m=maxCards();
-    var wins=0;
     for(var r=0;r<N;r++){
-      // случайный игрок: цель забрать после t карт (1..m), иногда жадничает
-      var target=1+Math.floor(Math.random()*m);
-      var p=bet, s=0, alive=true;
+      var target=1+Math.floor(Math.random()*m), p=bet, s=0;
       for(var c=0;c<target;c++){
-        turn+=p;                       // на кону кучка
-        if(Math.random()<0.5){         // угадал
-          var np=Math.min(bet*Math.pow(MULT,s+1),bet*CAP);
-          prof-=(np-p); fl-=(np-p); p=np; s++;
-          if(p>=bet*CAP-1e-9){alive=true;break;}
-        }else{                         // мимо
-          prof+=p; fl+=p; p=0; alive=false; break;
-        }
+        turn+=p;
+        if(Math.random()<0.5){ var np=Math.min(bet*Math.pow(MULT,s+1),bet*CAP); prof-=(np-p); fl-=(np-p); p=np; s++; if(p>=bet*CAP-1e-9)break; }
+        else{ prof+=p; fl+=p; p=0; break; }
       }
-      if(alive&&p>0){ /* забрал */ wins++; }
       if(fl<minFl)minFl=fl; if(fl>maxFl)maxFl=fl;
     }
-    return {start:start,end:fl,turn:turn,prof:prof,minFl:minFl,maxFl:maxFl,edge:prof/turn*100,N:N,wins:wins};
+    return {start:start,end:fl,turn:turn,prof:prof,minFl:minFl,maxFl:maxFl,edge:prof/turn*100,N:N};
   }
   function runSim(N){
     $('simBar').style.display='block'; $('simBar').firstElementChild.style.width='0';
     $('simOut').textContent='Считаю '+fmt(N)+' раундов…';
     setTimeout(function(){
-      var s=simulate(N);
-      var dd=s.start-s.minFl;                 // макс. просадка кассы
-      var ddPct=(dd/s.start*100);
+      var s=simulate(N), dd=s.start-s.minFl, ddPct=dd/s.start*100;
       $('simOut').innerHTML=
         '<span class="k">Раундов:</span> '+fmt(s.N)+' · ставка '+bet+'★<br>'+
         '<span class="k">Оборот:</span> '+stars(s.turn)+'<br>'+
@@ -500,29 +564,26 @@
         '<span class="k">Касса:</span> '+stars(s.start)+' → <b>'+stars(s.end)+'</b><br>'+
         '<span class="k">Худшая просадка:</span> '+stars(dd)+' ('+ddPct.toFixed(1)+'% запаса)';
       $('simBar').firstElementChild.style.width=Math.max(0,Math.min(100,(s.end/s.start*50)))+'%';
-      var ok = dd < s.start;
       $('simNote').style.display='block';
-      $('simNote').innerHTML = ok
+      $('simNote').innerHTML = dd<s.start
         ? '✅ Запаса хватило: касса просела максимум на '+ddPct.toFixed(1)+'% и закончила в плюсе. Перевес сошёлся к ~7,5%.'
-        : '⚠️ Касса уходила в минус — на старте при малом обороте запас критичен. Поэтому держим ~$1000 и потолок ×'+CAP+'.';
+        : '⚠️ Касса уходила в минус — на старте при малом обороте запас критичен. Держим ~$1000 и потолок ×'+CAP+'.';
     },30);
   }
 
   // ---- провабли-фейр кнопки ----
   $('pfReveal').onclick=function(){
-    if(!serverSeed){ return; }
-    revealed=true;
+    if(!serverSeed) return;
     $('pfHash').innerHTML=serverSeed+'<br><span style="color:var(--mut);font-size:10px;">(раскрыт · хэш совпадает = карты не подкручены)</span>';
   };
   $('pfCheck').onclick=function(){
     var R=$('pfResult');
     if(!lastCard){ R.className='pf-verify bad'; R.textContent='Сыграй хотя бы одну карту.'; return; }
     hmac256(serverSeed, clientSeed+':'+lastCard.nonce).then(function(hex){
-      var col=colorFromHmac(hex);
-      var ok = hex===lastCard.hex && col===lastCard.color;
+      var col=colorFromHmac(hex), ok=hex===lastCard.hex && col===lastCard.color;
       R.className='pf-verify '+(ok?'ok':'bad');
       R.innerHTML = ok
-        ? '✅ Совпало. Карта №'+lastCard.nonce+': '+(col==='red'?'красное':'чёрное')+'. HMAC: '+hex.slice(0,16)+'…'
+        ? '✅ Совпало. Карта №'+lastCard.nonce+': '+(col==='red'?'красное':'чёрное')+' ('+lastCard.card.r+lastCard.card.s+'). HMAC: '+hex.slice(0,16)+'…'
         : '❌ Не совпало.';
     });
   };
@@ -543,13 +604,12 @@
   $('start').onclick=startRound;
   $('cash').onclick=cashOut;
   [].forEach.call(document.querySelectorAll('.sim-row button'),function(b){ b.onclick=function(){runSim(+b.dataset.n);}; });
-
-  // ---- 18+ ----
   $('gateYes').onclick=function(){ $('gate').style.display='none'; };
 
   // init
   $('pfClient').value=randHex(8);
-  setStakeUI(); buildLadder(); refresh();
+  deck=buildDeck();
+  setStakeUI(); buildLadder(); setSides(); refresh();
 })();
 </script>
 </body>
