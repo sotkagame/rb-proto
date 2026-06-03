@@ -459,6 +459,7 @@
     if(balance<bet){ $('hint').textContent='Недостаточно звёзд на балансе'; return; }
     busy=true;
     balance-=bet; pot=bet; streak=0; inRound=true;
+    deck=buildDeck(); deckCompleted=false;   // свежая перемешанная колода каждую игру
     newSeeds(); showBack();
     $('start').style.display='none';
     $('cash').style.display='block'; $('cash').textContent='Забрать '+stars(pot);
@@ -466,14 +467,8 @@
     setSides(); bump($('stakeNum'));
     beep(440,0.05,'square',0.04);
     refresh();
-    var fresh = deck.length>=36;
-    if(fresh){
-      $('hint').textContent='Тасую свежую колоду…';
-      shuffleAnim().then(function(){ readyToGuess(); });
-    }else{
-      $('hint').textContent='Какого цвета следующая карта?';
-      enableGuess(true); busy=false;
-    }
+    $('hint').textContent='Тасую колоду…';
+    shuffleAnim().then(function(){ readyToGuess(); });
   }
   function readyToGuess(){
     $('hint').textContent='Какого цвета следующая карта?';
