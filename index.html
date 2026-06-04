@@ -232,7 +232,7 @@
       <button data-n="10000">10 000 раундов</button>
       <button data-n="100000">100 000 раундов</button>
     </div>
-    <div id="simOut">Нажми, чтобы прогнать тысячи раундов случайных игроков на текущей ставке и потолке. Покажет, как касса в среднем растёт на 7,5% и какие бывают просадки (хватит ли запаса).</div>
+    <div id="simOut">Нажми, чтобы прогнать тысячи раундов случайных игроков на текущей ставке и потолке. Покажет, как касса в среднем растёт на ~7,5–7,9% и какие бывают просадки (хватит ли запаса).</div>
     <div class="bar" id="simBar" style="display:none;"><i style="width:0"></i></div>
     <div class="note" id="simNote" style="display:none;"></div>
   </div>
@@ -263,9 +263,9 @@
     <div class="ref-stats">
       <div class="metric"><div class="l">Друзей</div><div class="v" id="refN">0</div></div>
       <div class="metric"><div class="l">Бонус</div><div class="v" id="refBonus">0★</div></div>
-      <div class="metric"><div class="l">% с их оборота</div><div class="v">25%</div></div>
+      <div class="metric"><div class="l">% с дохода казны</div><div class="v">25%</div></div>
     </div>
-    <div class="note">Заглушка двигателя роста (как у VIRUS): зовёшь друга → +200★ обоим, дальше получаешь % с его оборота. Своя реф-база = и рост, и страховка от бана бота. Кнопка ниже имитирует приход друга.</div>
+    <div class="note">Заглушка двигателя роста (как у VIRUS): зовёшь друга → +200★ обоим, дальше получаешь 25% от дохода казны с его игр (не от оборота). Своя реф-база = и рост, и страховка от бана бота. Кнопка ниже имитирует приход друга.</div>
     <button class="btn-cash" id="refAdd" style="margin-top:10px;background:var(--panel2);color:var(--gold);border:1px solid var(--line);">+ Пришёл друг по ссылке</button>
   </div>
 
@@ -287,7 +287,7 @@
 
   // ---- состояние ----
   var balance=2000, streak=0, pot=0, inRound=false, busy=false;
-  var floatBank=0, turnover=0, profit=0;
+  var floatBank=50000, turnover=0, profit=0;
 
   // ---- провабли-фейр ----
   var serverSeed='', serverHash='', clientSeed='', nonce=0, lastCard=null;
@@ -345,7 +345,7 @@
   }
 
   // ---- ladder / потолок ----
-  function potAfter(n){ return Math.min(bet*Math.pow(MULT,n), bet*CAP); }
+  function potAfter(n){ return Math.floor(Math.min(bet*Math.pow(MULT,n), bet*CAP)); }
   function capReached(n){ return bet*Math.pow(MULT,n) >= bet*CAP - 1e-9; }
   function maxCards(){ var n=0; while(!capReached(n)) n++; return n; }
 
@@ -448,7 +448,6 @@
     $('st50').classList.toggle('on',bet===50);
     $('st100').classList.toggle('on',bet===100);
     $('start').textContent='Поставить '+bet+'★ и начать';
-    floatBank=floatFor(bet);
   }
   function floatFor(b){ return b===50?50000:100000; }
 
@@ -488,19 +487,20 @@
       return flip(function(){showFace(drawn);}).then(function(){ updateDeckBar(); return cardColor; });
     }).then(function(cardColor){
       turnover+=risk;
-      return pause(450).then(function(){ return cardColor; });   // дать рассмотреть карту
-    }).then(function(cardColor){
+      var bonusMsg='';
+      if(deckCompleted){ balance+=DECK_BONUS; floatBank-=DECK_BONUS; profit-=DECK_BONUS; deckCompleted=false; bonusMsg='Колода пройдена! +'+DECK_BONUS+'★. '; beep(1200,0.12,'sine',0.05); }
+      return pause(450).then(function(){ return {c:cardColor,b:bonusMsg}; });   // дать рассмотреть карту
+    }).then(function(o){
+      var cardColor=o.c, bonusMsg=o.b;
       if(cardColor===color){
         var np=potAfter(streak+1);
         floatBank-=(np-pot); profit-=(np-pot);
         pot=np; streak++;
         $('card').classList.remove('lose'); $('card').classList.add('win');
         beep(660,0.08,'sine',0.06); setTimeout(function(){beep(900,0.1,'sine',0.06);},80);
-        var bonusMsg='';
-        if(deckCompleted){ balance+=DECK_BONUS; deckCompleted=false; bonusMsg='Колода пройдена! +'+DECK_BONUS+'★. '; beep(1200,0.12,'sine',0.05); }
         setSides(); bump($('winNum')); refresh();
         if(capReached(streak)){
-          $('hint').textContent='Потолок ×'+CAP+'! Максимум за раунд — забираем.';
+          $('hint').textContent=bonusMsg+'Потолок ×'+CAP+'! Максимум за раунд — забираем.';
           pause(700).then(function(){ finishWin(); busy=false; });
         }else{
           $('cash').textContent='Забрать '+stars(pot);
@@ -512,13 +512,13 @@
         $('card').classList.remove('win'); $('card').classList.add('lose');
         beep(150,0.4,'sawtooth',0.07); burn();
         $('winNum').textContent='🔥'; $('sideWin').style.opacity='1';
-        $('hint').textContent = streak===0
+        $('hint').textContent = bonusMsg+(streak===0
           ? 'Мимо на первой карте — ставка '+stars(bet)+' сгорела.'
-          : 'Мимо! Сгорело на '+(streak+1)+'-й карте. Серия оборвалась на '+streak+'.';
+          : 'Мимо! Сгорело на '+(streak+1)+'-й карте. Серия оборвалась на '+streak+'.');
         pot=0; refresh();
         pause(1100).then(function(){ endRound(); });
       }
-    });
+    }).catch(function(){ enableGuess(true); $('hint').textContent='Сбой — попробуй ещё раз.'; busy=false; });
   }
 
   function finishWin(){
@@ -572,15 +572,17 @@
         '<span class="k">Худшая просадка:</span> '+stars(dd)+' ('+ddPct.toFixed(1)+'% запаса)';
       $('simBar').firstElementChild.style.width=Math.max(0,Math.min(100,(s.end/s.start*50)))+'%';
       $('simNote').style.display='block';
-      $('simNote').innerHTML = dd<s.start
-        ? '✅ Запаса хватило: касса просела максимум на '+ddPct.toFixed(1)+'% и закончила в плюсе. Перевес сошёлся к ~7,5%.'
-        : '⚠️ Касса уходила в минус — на старте при малом обороте запас критичен. Держим ~$1000 и потолок ×'+CAP+'.';
+      var floatUsd=Math.round(floatFor(bet)*0.02);
+      $('simNote').innerHTML = (dd<s.start && s.end>=s.start)
+        ? '✅ Запаса хватило: касса просела максимум на '+ddPct.toFixed(1)+'% и закончила в плюсе. Перевес сошёлся к ~7,5–7,9% (потолок чуть добавляет).'
+        : '⚠️ Касса проседала — на старте при малом обороте запас критичен. Держим ~$'+floatUsd+' и потолок ×'+CAP+'.';
     },30);
   }
 
   // ---- провабли-фейр кнопки ----
   $('pfReveal').onclick=function(){
     if(!serverSeed) return;
+    if(inRound){ var Rr=$('pfResult'); Rr.className='pf-verify bad'; Rr.textContent='Раскрытие только после раунда — иначе можно подсмотреть будущие карты.'; return; }
     $('pfHash').innerHTML=serverSeed+'<br><span style="color:var(--mut);font-size:10px;">(раскрыт · хэш совпадает = карты не подкручены)</span>';
   };
   $('pfCheck').onclick=function(){
